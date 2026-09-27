@@ -23,18 +23,19 @@ public class ServicioClienteTest {
 
 	@Test
 	void crearClienteNuevoDeberiaAgregarlo() {
-		Cliente cliente = new Cliente("123", "Juan", "Perez");
+		Cliente cliente = new Cliente("123", "Juan", "Perez", "juan.perez@mail.com");
 
 		Cliente resultado = servicio.crear(cliente);
 
 		assertNotNull(resultado);
 		assertEquals(1, servicio.listar().size());
+		assertEquals("juan.perez@mail.com", resultado.getEmail());
 	}
 
 	@Test
 	void crearClienteConCedulaExistenteDeberiaRetornarNull() {
-		Cliente cliente1 = new Cliente("123", "Juan", "Perez");
-		Cliente cliente2 = new Cliente("123", "Pedro", "Gomez");
+		Cliente cliente1 = new Cliente("123", "Juan", "Perez", "juan.perez@mail.com");
+		Cliente cliente2 = new Cliente("123", "Pedro", "Gomez", "pedro.gomez@mail.com");
 		servicio.crear(cliente1);
 
 		Cliente resultado = servicio.crear(cliente2);
@@ -45,13 +46,14 @@ public class ServicioClienteTest {
 
 	@Test
 	void buscarPorCedulaExistenteDeberiaRetornarCliente() {
-		Cliente cliente = new Cliente("123", "Juan", "Perez");
+		Cliente cliente = new Cliente("123", "Juan", "Perez", "juan.perez@mail.com");
 		servicio.crear(cliente);
 
 		Cliente resultado = servicio.buscarPorCedula("123");
 
 		assertNotNull(resultado);
 		assertEquals("Juan", resultado.getNombre());
+		assertEquals("juan.perez@mail.com", resultado.getEmail());
 	}
 
 	@Test
@@ -63,27 +65,37 @@ public class ServicioClienteTest {
 
 	@Test
 	void listarDeberiaRetornarTodosLosClientes() {
-		servicio.crear(new Cliente("123", "Juan", "Perez"));
-		servicio.crear(new Cliente("456", "Ana", "Lopez"));
+		servicio.crear(new Cliente("123", "Juan", "Perez", "juan.perez@mail.com"));
+		servicio.crear(new Cliente("456", "Ana", "Lopez", "ana.lopez@mail.com"));
 
 		assertEquals(2, servicio.listar().size());
 	}
 
 	@Test
-	void actualizarClienteExistenteDeberiaModificarNombreYApellido() {
-		servicio.crear(new Cliente("123", "Juan", "Perez"));
-		Cliente actualizado = new Cliente("123", "Carlos", "Ramirez");
+	void actualizarClienteExistenteDeberiaModificarNombreApellidoYEmail() {
+		servicio.crear(new Cliente("123", "Juan", "Perez", "juan.perez@mail.com"));
+		Cliente actualizado = new Cliente("123", "Carlos", "Ramirez", "carlos.ramirez@mail.com");
 
 		Cliente resultado = servicio.actualizar("123", actualizado);
 
 		assertNotNull(resultado);
 		assertEquals("Carlos", resultado.getNombre());
 		assertEquals("Ramirez", resultado.getApellido());
+		assertEquals("carlos.ramirez@mail.com", resultado.getEmail());
+	}
+
+	@Test
+	void actualizarClienteDeberiaPersistirNuevoEmail() {
+		servicio.crear(new Cliente("123", "Juan", "Perez", "juan.perez@mail.com"));
+
+		servicio.actualizar("123", new Cliente("123", "Juan", "Perez", "nuevo.email@mail.com"));
+
+		assertEquals("nuevo.email@mail.com", servicio.buscarPorCedula("123").getEmail());
 	}
 
 	@Test
 	void actualizarClienteInexistenteDeberiaRetornarNull() {
-		Cliente actualizado = new Cliente("999", "Carlos", "Ramirez");
+		Cliente actualizado = new Cliente("999", "Carlos", "Ramirez", "carlos.ramirez@mail.com");
 
 		Cliente resultado = servicio.actualizar("999", actualizado);
 
@@ -92,7 +104,7 @@ public class ServicioClienteTest {
 
 	@Test
 	void eliminarClienteExistenteDeberiaRetornarTrue() {
-		servicio.crear(new Cliente("123", "Juan", "Perez"));
+		servicio.crear(new Cliente("123", "Juan", "Perez", "juan.perez@mail.com"));
 
 		boolean resultado = servicio.eliminar("123");
 
